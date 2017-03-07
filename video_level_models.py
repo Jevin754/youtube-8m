@@ -24,8 +24,32 @@ import tensorflow.contrib.slim as slim
 
 FLAGS = flags.FLAGS
 flags.DEFINE_integer(
-    "moe_num_mixtures", 2,
+    "moe_num_mixtures", 10,
     "The number of mixtures (excluding the dummy 'expert') used for MoeModel.")
+
+class MLPModel(models.BaseModel):
+  """Multi-Layer Perceptron model."""
+
+  def create_model(self,
+		   model_input,
+		   vocab_size,
+		   l2_penalty=1e-8,
+		   **unused_params):
+    """Create a Multi-Layer Perceptron
+    Args:
+      model_input: 'batch_size' x 'num_features' matrix of input features.
+      vocab_size: The number of classes in the dataset.
+      l2_penalty: How much to penalize the squared magnitudes of parameter values.
+   
+    Returns:
+      A dictionary with a tensor containing the probability predictions of the
+      model in the 'predictions' key. The dimensions of the tensor are 
+      batch_size x num_classes."""
+    x = slim.fully_connected(model_input, 2048, scope='fc_1')
+    x = slim.fully_connected(x, 4096, scope='fc_2')
+    output = slim.fully_connected(x, vocab_size, activation_fn=tf.nn.sigmoid, weights_regularizer=slim.l2_regularizer(l2_penalty))
+    return {"predictions": output}
+
 
 class LogisticModel(models.BaseModel):
   """Logistic model with L2 regularization."""

@@ -36,6 +36,21 @@ class BaseLoss(object):
     """
     raise NotImplementedError()
 
+# =========================== By Jevin ==========================
+class L2NormLoss(BaseLoss):
+  """Calulate the L2-Norm loss between the predictions and labels
+  """
+
+  def calculate_loss(self, predictions, labels, **unused_params):
+    with tf.name_scope("l2_norm_loss"):
+      epsilon = 10e-6
+      float_labels = tf.cast(labels, tf.float32)
+      l2_norm_loss = tf.nn.l2_loss(predictions - float_labels)
+      return tf.reduce_mean(l2_norm_loss)
+
+
+# ===============================================================
+
 
 class CrossEntropyLoss(BaseLoss):
   """Calculate the cross entropy loss between the predictions and labels.
